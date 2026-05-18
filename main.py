@@ -20,6 +20,12 @@ def root():
     return {
         "message": "API времени",
         "docs": "/docs",
+        "endpoints": {
+            "time": "/time",
+            "date": "/date",
+            "date_iso": "/date/iso",
+            "date_ru": "/date/ru",
+        },
     }
 
 
@@ -31,6 +37,33 @@ def get_server_time():
         "utc": now.isoformat(),  # ISO 8601, например: 2026-05-17T14:27:17+00:00
         "timestamp": now.timestamp(),  # Unix-время в секундах
     }
+
+
+@app.get("/date")
+def get_server_date():
+    """Возвращает текущую дату сервера (UTC) и её компоненты."""
+    today = datetime.now(timezone.utc).date()
+    return {
+        "utc": today.isoformat(),
+        "year": today.year,
+        "month": today.month,
+        "day": today.day,
+        "weekday": today.isoweekday(),  # 1 — понедельник, 7 — воскресенье
+    }
+
+
+@app.get("/date/iso")
+def get_server_date_iso():
+    """Возвращает дату в формате ISO 8601 (YYYY-MM-DD)."""
+    today = datetime.now(timezone.utc).date()
+    return {"date": today.isoformat()}
+
+
+@app.get("/date/ru")
+def get_server_date_ru():
+    """Возвращает дату в формате ДД.ММ.ГГГГ."""
+    today = datetime.now(timezone.utc).date()
+    return {"date": today.strftime("%d.%m.%Y")}
 
 
 if __name__ == "__main__":
