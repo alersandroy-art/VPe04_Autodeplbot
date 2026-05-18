@@ -1,0 +1,84 @@
+# Сборка Docker-образа → push в GitHub Container Registry → деплой на сервер по SSH
+name: Build and Deploy
+
+on:
+  push:
+    branches: [main, develop]
+  workflow_dispatch:  # ручной запуск из вкладки Actions
+
+env:
+  REGISTRY: ghcr.io
+  # Имя образа в нижнем регистре (требование GHCR/Docker)
+  IMAGE_NAME: ghcr.io/${{ github.repository_owner }}/vpe04-autodeplbot
+
+jobs:
+  # --- Джоба 1: сборка и публикация образа ---
+  build-and-push:
+    name: Сборка и push в GHCR
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Клонирование репозитория
+        uses: actions/checkout@v4
+
+      - name: Вход в GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Сборка и отправка образа
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ./Dockerfile
+          push: true
+          tags: |
+            ${{ env.IMAGE_NAME }}:latest
+            ${{ env.IMAGE_NAME }}:${{ github.sha }}
+
+    outputs:
+      image: ${{ env.IMAGE_NAME }}:${{ github.sha }}
+
+  # --- Джоба 2: деплой на удалённый сервер ---
+  deploy:
+    name: Деплой по SSH
+    needs: build-and-push
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Подключение по SSH и запуск контейнера
+        uses: appleboy/ssh-action@v1.2.0
+        env:
+          IMAGE: ${{ needs.build-and-push.outputs.image }}
+          GHCR_USERNAME: ${{ github.repository_owner }}
+          GHCR_TOKEN: ${{ secrets.GHCR_TOKEN }}
+          CONTAINER_NAME: time-api
+          APP_PORT: "8000"
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: ${{ secrets.SSH_PORT || 22 }}
+          envs: IMAGE,GHCR_USERNAME,GHCR_TOKEN,CONTAINER_NAME,APP_PORT
+          script: |
+            set -e
+
+            echo "$GHCR_TOKEN" | docker login ghcr.io -u "$GHCR_USERNAME" --password-stdin
+
+            docker pull "$IMAGE"
+
+            docker stop "$CONTAINER_NAME" 2>/dev/null || true
+            docker rm "$CONTAINER_NAME" 2>/dev/null || true
+
+            docker run -d \
+              --name "$CONTAINER_NAME" \
+              --restart unless-stopped \
+              -p "${APP_PORT}:8000" \
+              "$IMAGE"
+
+            docker image prune -f
