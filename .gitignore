@@ -11,6 +11,8 @@ env/
 # Переменные окружения (секреты)
 .env
 .env.*
+.tmp_deploy_key
+**/VPe04.txt
 
 # IDE
 .idea/
