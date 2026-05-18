@@ -25,6 +25,8 @@ def root():
             "date": "/date",
             "date_iso": "/date/iso",
             "date_ru": "/date/ru",
+            "datetime": "/datetime",
+            "health": "/health",
         },
     }
 
@@ -64,6 +66,24 @@ def get_server_date_ru():
     """Возвращает дату в формате ДД.ММ.ГГГГ."""
     today = datetime.now(timezone.utc).date()
     return {"date": today.strftime("%d.%m.%Y")}
+
+
+@app.get("/datetime")
+def get_server_datetime():
+    """Возвращает текущие дату и время сервера (UTC)."""
+    now = datetime.now(timezone.utc)
+    return {
+        "utc": now.isoformat(),
+        "date": now.date().isoformat(),
+        "time": now.strftime("%H:%M:%S"),
+        "timestamp": now.timestamp(),
+    }
+
+
+@app.get("/health")
+def health_check():
+    """Проверка работоспособности сервиса."""
+    return {"status": "ok"}
 
 
 if __name__ == "__main__":
