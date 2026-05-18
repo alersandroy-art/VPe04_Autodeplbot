@@ -58,7 +58,7 @@ jobs:
           GHCR_USERNAME: ${{ github.repository_owner }}
           GHCR_TOKEN: ${{ secrets.GHCR_TOKEN }}
           CONTAINER_NAME: time-api
-          APP_PORT: "8000"
+          APP_PORT: "8001"
         with:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USER }}
