@@ -12,7 +12,7 @@ from fastapi import FastAPI, Request
 
 def send_log_to_loki(message, job="time-api", level="INFO"):
     """Отправляет лог в Grafana Loki."""
-    loki_url = "http://89.111.169.142:3100/loki/api/v1/push"
+    loki_url = "http://89.108.98.6:3100/loki/api/v1/push"
 
     timestamp = str(int(time.time() * 1_000_000_000))
 
