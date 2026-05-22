@@ -22,7 +22,7 @@
 
 | Секрет | Обязательный | Описание |
 |--------|:------------:|----------|
-| `SSH_HOST` | да | IP-адрес или домен сервера (например `194.67.99.160`) |
+| `SSH_HOST` | да | IP сервера VPe05: `89.108.98.6` |
 | `SSH_USER` | да | Пользователь SSH (например `root` или `deploy`) |
 | `SSH_PRIVATE_KEY` | да | Приватный SSH-ключ (весь текст файла, с `BEGIN` и `END`) |
 | `GHCR_TOKEN` | да* | Токен для `docker login` на сервере |
@@ -50,7 +50,7 @@ ssh-keygen -t ed25519 -C "github-deploy" -f $env:USERPROFILE\.ssh\deploy_key
 Проверка подключения:
 
 ```powershell
-ssh -i $env:USERPROFILE\.ssh\deploy_key SSH_USER@SSH_HOST
+ssh VPe05
 ```
 
 ### 2. Секреты SSH на GitHub
@@ -112,9 +112,10 @@ docker --version
 
 1. **Actions** → **Build and Deploy** → **Run workflow** (ветка `develop` или `main`).
 2. Обе джобы должны завершиться зелёным статусом.
-3. API на сервере:
-   - http://`<SSH_HOST>`:8000/time
-   - http://`<SSH_HOST>`:8000/date
+3. API на сервере **VPe05** (`89.108.98.6`):
+   - http://89.108.98.6:8000/time
+   - http://89.108.98.6:8000/date
+   - Grafana (логи): http://89.108.98.6:3000
 
 ---
 

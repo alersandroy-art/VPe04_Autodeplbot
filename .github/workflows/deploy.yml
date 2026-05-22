@@ -44,7 +44,7 @@ jobs:
     outputs:
       image: ${{ env.IMAGE_NAME }}:${{ github.sha }}
 
-  # --- Джоба 2: деплой на удалённый сервер ---
+  # --- Джоба 2: деплой на VPe05 (89.108.98.6) ---
   deploy:
     name: Деплой по SSH
     needs: build-and-push
